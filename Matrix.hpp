@@ -2,10 +2,242 @@
 #define MATRIX_HPP
 #include <cstdint>
 #include <initializer_list>
+template <uint32_t ROWS, uint32_t COLS, typename Scalar = double>
+class Matrix;
+
+template<uint32_t N, typename Scalar = double>
+using Column = Matrix<N, 1, Scalar>;
+template<uint32_t N, typename Scalar = double>
+using Row = Matrix<1, N, Scalar>;
 
 template <uint32_t ROWS, uint32_t COLS, typename Scalar = double>
 class Matrix
 {
+	class ColRef
+	{
+		friend class Matrix;
+		Matrix& matrix;
+		const int col_index;
+		ColRef(const Matrix& matrix, int index) noexcept:
+			matrix(matrix), col_index(index)
+		{}
+	public:
+		ColRef(const ColRef&) = default;
+		ColRef(ColRef&&) = default;
+
+		Scalar& operator[](uint32_t index){ return m.at(index, col_index);}
+		const Scalar& operator[](uint32_t index) const { return m.at(index, col_index);}
+		
+		constexpr uint32_t size() const { return ROWS;}
+		uint32_t index() const {return col_index;}
+
+		ColRef& operator+=(Scalar n) const
+		{
+			for(uint32_t row = 0; row < ROWS; row++)
+				m(row, col_index) += n;
+			return *this;
+		}
+		ColRef& operator-=(Scalar n) const
+		{
+			for(uint32_t row = 0; row < ROWS; row++)
+				m(row, col_index) -= n;
+			return *this;
+		}
+		ColRef& operator*=(Scalar n) const
+		{
+			for(uint32_t row = 0; row < ROWS; row++)
+				m(row, col_index) *= n;
+			return *this;
+		}
+		ColRef& operator/=(Scalar n) const
+		{
+			for(uint32_t row = 0; row < ROWS; row++)
+				m(row, col_index) /= n;
+			return *this;
+		}
+		friend ColRef& operator+=(const ColRef& col, Scalar n){return col += scalar;}
+		friend ColRef& operator-=(const ColRef& col, Scalar n){return col -= scalar;}
+		friend ColRef& operator*=(const ColRef& col, Scalar n){return col *= scalar;}
+		friend ColRef& operator/=(const ColRef& col, Scalar n){return col /= scalar;}
+
+		ColRef& operator+=(const Matrix<ROWS, 1, Scalar>& col_matrix) const
+		{
+			for(uint32_t row = 0; row < ROWS; row++)
+				m(row, col_index) += col_matrix(row, 0);
+			return *this;
+		}
+		ColRef& operator-=(const Matrix<ROWS, 1, Scalar>& col_matrix) const
+		{
+			for(uint32_t row = 0; row < ROWS; row++)
+				m(row, col_index) -= col_matrix(row, 0);
+			return *this;
+		}
+		ColRef& operator*=(const Matrix<ROWS, 1, Scalar>& col_matrix) const
+		{
+			for(uint32_t row = 0; row < ROWS; row++)
+				m(row, col_index) *= col_matrix(row, 0);
+			return *this;
+		}
+		ColRef& operator/=(const Matrix<ROWS, 1, Scalar>& col_matrix) const
+		{
+			for(uint32_t row = 0; row < ROWS; row++)
+				m(row, col_index) /= col_matrix(row, 0);
+			return *this;
+		}
+		friend Matrix<ROWS, 1, Scalar>& operator+=(Matrix<ROWS, 1, Scalar>& col_matrix, const ColRef& col_ref)
+		{
+			for(uint32_t row = 0; row < ROWS; row++)
+				col_matrix(row, col_index) += col_ref[row];
+			return col_matrix;
+		}
+		friend Matrix<ROWS, 1, Scalar>& operator-=(Matrix<ROWS, 1, Scalar>& col_matrix, const ColRef& col_ref)
+		{
+			for(uint32_t row = 0; row < ROWS; row++)
+				col_matrix(row, col_index) -= col_ref[row];
+			return col_matrix;
+		}
+		friend Matrix<ROWS, 1, Scalar>& operator*=(Matrix<ROWS, 1, Scalar>& col_matrix, const ColRef& col_ref)
+		{
+			for(uint32_t row = 0; row < ROWS; row++)
+				col_matrix(row, col_index) *= col_ref[row];
+			return col_matrix;
+		}
+		friend Matrix<ROWS, 1, Scalar>& operator/=(Matrix<ROWS, 1, Scalar>& col_matrix, const ColRef& col_ref)
+		{
+			for(uint32_t row = 0; row < ROWS; row++)
+				col_matrix(row, col_index) /= col_ref[row];
+			return col_matrix;
+		}
+		friend Matrix<ROWS, 1, Scalar> operator+(Matrix<ROWS, 1, Scalar> col_matrix, const ColRef& col_ref)
+		{
+			return col_matrix += col_ref;
+		}
+		friend Matrix<ROWS, 1, Scalar> operator-(Matrix<ROWS, 1, Scalar> col_matrix, const ColRef& col_ref)
+		{
+			return col_matrix -= col_ref;
+		}
+		friend Matrix<ROWS, 1, Scalar> operator*(Matrix<ROWS, 1, Scalar> col_matrix, const ColRef& col_ref)
+		{
+			return col_matrix *= col_ref;
+		}
+		friend Matrix<ROWS, 1, Scalar> operator/(Matrix<ROWS, 1, Scalar> col_matrix, const ColRef& col_ref)
+		{
+			return col_matrix /= col_ref;
+		}
+	};
+	class RowRef
+	{
+		friend class Matrix;
+		Matrix& matrix;
+		const int row_index;
+		RowRef(const Matrix& matrix, int index) noexcept:
+			matrix(matrix), row_index(index)
+		{}
+	public:
+		RowRef(const RowRef&) = default;
+		RowRef(RowRef&&) = default;
+
+		Scalar& operator[](uint32_t index){ return m.at(row_index, index);}
+		const Scalar& operator[](uint32_t index) const { return m.at(row_index, index);}
+		
+		constexpr uint32_t size() const { return COLS;}
+		uint32_t index() const {return row_index;}
+		
+		RowRef& operator+=(Scalar n) const
+		{
+			for(uint32_t col = 0; col < COLS; col++)
+				m(row_index, col) += n;
+			return *this;
+		}
+		RowRef& operator-=(Scalar n) const
+		{
+			for(uint32_t col = 0; col < COLS; col++)
+				m(row_index, col) -= n;
+			return *this;
+		}
+		RowRef& operator*=(Scalar n) const
+		{
+			for(uint32_t col = 0; col < COLS; col++)
+				m(row_index, col) *= n;
+			return *this;
+		}
+		RowRef& operator/=(Scalar n) const
+		{
+			for(uint32_t col = 0; col < COLS; col++)
+				m(row_index, col) /= n;
+			return *this;
+		}
+
+		friend RowRef& operator+=(const RowRef& row, Scalar n){return row += scalar;}
+		friend RowRef& operator-=(const RowRef& row, Scalar n){return row -= scalar;}
+		friend RowRef& operator*=(const RowRef& row, Scalar n){return row *= scalar;}
+		friend RowRef& operator/=(const RowRef& row, Scalar n){return row /= scalar;}
+
+		RowRef& operator+=(const Matrix<1, ROWS, Scalar>& row_matrix) const
+		{
+			for(uint32_t col = 0; col < COLS; col++)
+				m(row_index, col) += row_matrix(0, col);
+			return *this;
+		}
+		RowRef& operator-=(const Matrix<1, ROWS, Scalar>& row_matrix) const
+		{
+			for(uint32_t col = 0; col < COLS; col++)
+				m(row_index, col) -= row_matrix(0, col);
+			return *this;
+		}
+		RowRef& operator*=(const Matrix<1, ROWS, Scalar>& row_matrix) const
+		{
+			for(uint32_t col = 0; col < COLS; col++)
+				m(row_index, col) *= row_matrix(0, col);
+			return *this;
+		}
+		RowRef& operator/=(const Matrix<1, ROWS, Scalar>& row_matrix) const
+		{
+			for(uint32_t col = 0; col < COLS; col++)
+				m(row_index, col) /= row_matrix(0, col);
+			return *this;
+		}
+		friend Matrix<1, COLS, Scalar>& operator+=(Matrix<1, COLS, Scalar>& col_matrix, const ColRef& col_ref)
+		{
+			for(uint32_t col = 0; col < COLS; col++)
+				row_matrix(row_index, col) += col_ref[col];
+			return col_matrix;
+		}
+		friend Matrix<1, COLS, Scalar>& operator-=(Matrix<1, COLS, Scalar>& col_matrix, const ColRef& col_ref)
+		{
+			for(uint32_t col = 0; col < COLS; col++)
+				row_matrix(row_index, col) -= col_ref[col];
+			return col_matrix;
+		}
+		friend Matrix<1, COLS, Scalar>& operator*=(Matrix<1, COLS, Scalar>& col_matrix, const ColRef& col_ref)
+		{
+			for(uint32_t col = 0; col < COLS; col++)
+				row_matrix(row_index, col) *= col_ref[col];
+			return col_matrix;
+		}
+		friend Matrix<1, COLS, Scalar>& operator/=(Matrix<1, COLS, Scalar>& col_matrix, const ColRef& col_ref)
+		{
+			for(uint32_t col = 0; col < COLS; col++)
+				row_matrix(row_index, col) /= col_ref[col];
+			return col_matrix;
+		}
+		friend Matrix<1, COLS, Scalar> operator+(Matrix<1, COLS, Scalar> col_matrix, const ColRef& col_ref)
+		{
+			return col_matrix += col_ref;
+		}
+		friend Matrix<1, COLS, Scalar> operator-(Matrix<1, COLS, Scalar> col_matrix, const ColRef& col_ref)
+		{
+			return col_matrix -= col_ref;
+		}
+		friend Matrix<1, COLS, Scalar> operator*(Matrix<1, COLS, Scalar> col_matrix, const ColRef& col_ref)
+		{
+			return col_matrix *= col_ref;
+		}
+		friend Matrix<1, COLS, Scalar> operator/(Matrix<1, COLS, Scalar> col_matrix, const ColRef& col_ref)
+		{
+			return col_matrix /= col_ref;
+		}
+	};
 private:
 	Scalar buffer[ROWS][COLS];
 public:
@@ -50,6 +282,50 @@ public:
 
 	inline Scalar* operator[](uint32_t row_index){ return buffer[row_index];}
 	inline const Scalar* operator[](uint32_t row_index) const{ return buffer[row_index];}
+
+	inline ColRef getColRef(uint32_t col_index){ return ColRef(*this, col_index);}
+	inline RowRef getRowRef(uint32_t row_index){ return RowRef(*this, row_index);}
+
+	Matrix<ROWS, 1, Scalar> col(uint32_t index) const
+	{
+		Column out;
+		for(uint32_t row = 0; row < ROWS; row++)
+		{
+			out(row, index) = at(row, index);
+		}
+		return out;
+	}
+	Matrix<1, COLS, Scalar> row(uint32_t index) const
+	{
+		Row out;
+		for(uint32_t col = 0; col < COLS; col++)
+		{
+			out(index, col) = at(index, col);
+		}
+		return out;
+	}
+	void swapCols(uint32_t i, uint32_t j)
+	{
+		Scalar aux;
+		for(uint32_t row = 0; row < ROWS; row++)
+		{
+			aux = at(row, i);
+			at(row, i) = at(row, j);
+			at(row, j) = aux;
+		}
+	}
+	
+	void swapRows(uint32_t i, uint32_t j)
+	{
+		Scalar aux;
+		for(uint32_t col = 0; col < COLS; col++)
+		{
+			aux = at(i, col);
+			at(i, col) = at(j, col);
+			at(j, col) = aux;
+		}
+	}
+
 	bool operator== (const Matrix& rhs) const
 	{
 		Scalar* a = buffer;
@@ -221,9 +497,40 @@ Matrix<ROWS, COLS, Scalar> adj_matrix(const Matrix<ROWS, COLS, Scalar>& matrix)
 			out(row, col) = det(m.minor(row, col));
 	return out;
 }
+
+template<uint32_t N, typename Scalar = double>
+bool may_have_inv(const Matrix<N, N, Scalar>& matrix)
+{
+	return det(matrix);
+}
 template<uint32_t N, typename Scalar = double>
 Matrix<N, N, Scalar> inv(const Matrix<N, N, Scalar>& matrix)
 {
 	return adj_matrix(trans(matrix)) /= det(matrix);
+}
+
+template<uint32_t ROWS,uint32_t COLS, typename Scalar = double>
+Matrix<ROWS, COLS, Scalar> triangulate(Matrix<ROWS, COLS, Scalar> matrix)
+{
+	for (uint32_t i = 0; i < ROWS-1; i++)
+	{
+		//Make the pivot 1, and transform the whole row as a result
+		const Scalar raw_pivot = matrix(i, i);
+		for(uint32_t k = 0; k < COLS; k++)
+			matrix(i, k) /= raw_pivot;
+		//for the remaining rows
+		for (uint32_t j = i+1; j < ROWS; j++)
+		{
+			//The number to become 0
+			const Scalar n = matrix(j, i);
+			// Skip this row if already 0
+			if(n == Scalar(0)) continue;
+
+			// Fj - nFi
+			for(uint32_t k = 0; k < COLS; k++)
+				matrix(j, k) -= n * matrix(i, k);
+		}
+	}
+	return matrix;
 }
 #endif

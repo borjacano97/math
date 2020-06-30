@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "*.tpp": "cpp",
+        "type_traits": "cpp",
+        "cmath": "cpp"
+    },
+    "c-cpp-compile-run.cpp-flags": "-Wall -Wextra -std=c++20"
+}
