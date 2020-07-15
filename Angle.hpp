@@ -28,11 +28,15 @@ template<typename T>
 constexpr auto HALF_PI = PI<T> / static_cast<T>(2);
 
 template<typename Real>
+constexpr static auto rad2deg = static_cast<Real>(180.0) / PI<Real>;
+template<typename Real>
+constexpr static auto deg2rad = PI / static_cast<Real>(180.0);
+
+template<typename Real>
 class Radians;
 template<typename Real>
 class Degrees
 {
-	constexpr static auto rad2deg = static_cast<Real>(180.0) / PI<Real>;
 	Real value;
 public:
 	constexpr Degrees() noexcept: value(0){}
@@ -40,7 +44,7 @@ public:
 	constexpr Degrees(Degrees&&) = default;
 	explicit constexpr Degrees(Real value) noexcept: value(value){}
 	explicit constexpr Degrees(const Radians& radians) noexcept:
-		value(radians*rad2deg){}
+		value(radians*rad2deg<Real>){}
 	constexpr operator Radians() noexcept const { return Radians(value*rad2deg);}
 
 	constexpr Real& raw() { return value;}
@@ -59,7 +63,6 @@ public:
 template<typename Real>
 struct Radians
 {
-	constexpr static auto deg2rad = PI / static_cast<Real>(180.0);
 	Real value;
 public:
 	constexpr Radians() noexcept: value(0){}
@@ -67,8 +70,8 @@ public:
 	constexpr Radians(Radians&&) noexcept = default;
 	explicit constexpr Radians(Real value) noexcept: value(value){}
 	explicit constexpr Radians(const Degrees& degrees) noexcept:
-		value(degrees*deg2rad){}
-	constexpr operator Radians() noexcept const { return Radians(degrees*deg2rad);}
+		value(degrees*deg2rad<Real>){}
+	constexpr operator Degrees() noexcept const { return Degrees(value*rad2deg<Real>);}
 
 	constexpr Real& raw() { return value;}
 	constexpr const Real& raw() const { return value;}
