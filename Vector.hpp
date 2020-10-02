@@ -6,10 +6,10 @@
 #include "Angle.hpp"
 
 
-template<typename Number>
+template<typename Real>
 struct Vector2D
 {
-	Number x, y;
+	Real x, y;
 
 	constexpr Vector2D() noexcept: x(0), y(0){}
 	constexpr Vector2D(Real x, Real y) noexcept: x(x), y(y){}
