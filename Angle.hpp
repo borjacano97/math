@@ -106,12 +106,12 @@ public:
 	constexpr bool operator>=(const Angle& rhs) const {return value >= rhs.value;}
 
 
-	friend inline void cos(const Angle& x)	{ return  COS(x.value);}
-	friend inline void acos(const Angle& x)	{ return ACOS(x.value);}
-	friend inline void sin(const Angle& x)	{ return  SIN(x.value);}
-	friend inline void asin(const Angle& x)	{ return ASIN(x.value);}
-	friend inline void tan(const Angle& x)	{ return  TAN(x.value);}
-	friend inline void atan(const Angle& x)	{ return ATAN(x.value);}
+	friend inline Angle cos(const Angle& x)	{ return Angle(Radians( COS(x.value)));}
+	friend inline Angle acos(const Angle& x)	{ return Angle(Radians(ACOS(x.value)));}
+	friend inline Angle sin(const Angle& x)	{ return Angle(Radians( SIN(x.value)));}
+	friend inline Angle asin(const Angle& x)	{ return Angle(Radians(ASIN(x.value)));}
+	friend inline Angle tan(const Angle& x)	{ return Angle(Radians( TAN(x.value)));}
+	friend inline Angle atan(const Angle& x)	{ return Angle(Radians(ATAN(x.value)));}
 };
 
 
